@@ -84,11 +84,10 @@ if to_method == 'ftps':
 
 
 # Do the move
-walker = Walker(filter=[from_filter])
+walker = Walker(filter=[from_filter], ignore_errors=True, max_depth=1)
 
 for path in walker.files(from_fs):
     logger(0, 'File to move: {}'.format(path))
-
 
     if to_delete == 'yes' and to_fs.exists(path):
         logger(0, 'delete (to): {}'.format(path))
