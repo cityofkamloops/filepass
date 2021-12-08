@@ -1,29 +1,24 @@
+import sys
+
 import fs
 import os
 import fs.smbfs
 import fs.ftpfs
 from fs.walk import Walker
-import fplogger
-
-
-log = fplogger.FPLogger()
-
-
-def logger(log_level, log_message):
-    log.write(log_level, log_message)
+import logging
+import graypy
 
 
 # File Transfer Types
-def ssh_connection(user, pw, svr, port, dir):
-    logger(0, "ssh://{}:{}@{}:{}{}".format(user, "passwordhere", svr, port, dir))
+def ssh_connection(logger, user, pw, svr, port, dir):
+    logger.debug("ssh://{}:{}@{}:{}{}".format(user, "passwordhere", svr, port, dir))
     fs_conn = fs.open_fs("ssh://{}:{}@{}:{}{}".format(user, pw, svr, port, dir))
     return fs_conn
 
 
-def smb_connection(user, pw, svr, port, smbshare, dir):
-    logger(
-        0,
-        "smb://{}:{}@{}:{}/{}".format(user, "passwordhere", svr, port, smbshare + dir),
+def smb_connection(logger, user, pw, svr, port, smbshare, dir):
+    logger.debug(
+        "smb://{}:{}@{}:{}/{}".format(user, "passwordhere", svr, port, smbshare + dir)
     )
     fs_conn = fs.open_fs(
         "smb://{}:{}@{}:{}/{}?direct-tcp=True&name-port=139&timeout=15&domain=".format(
@@ -34,12 +29,11 @@ def smb_connection(user, pw, svr, port, smbshare, dir):
     return fs_conn
 
 
-def ftps_connection(user, pw, svr, port, tls, dir):
-    logger(
-        0,
+def ftps_connection(logger, user, pw, svr, port, tls, dir):
+    logger.debug(
         "ftps host: {} user: {} password: {} port: {} tls: {} dir: {}".format(
             svr, user, "passwordhere", port, tls, dir
-        ),
+        )
     )
     # fs_conn = fs.ftpfs.FTPFS(host=svr, user=user, passwd=pw, port=port, tls=tls)
     fs_conn = fs.open_fs("ftps://{}:{}@{}/{}".format(user, pw, svr, dir))
@@ -52,6 +46,11 @@ def transfer_file(from_fs, to_fs, filename):
 
 def main():
     # Load Environmental Variables
+
+    # GREYLOG_SERVER
+    # GREYLOG_PORT
+    # INTEGRATION_NAME
+
     from_user = os.environ.get("FROMUSER")
     from_pw = os.environ.get("FROMPW")
     from_svr = os.environ.get("FROMSVR")
@@ -71,67 +70,103 @@ def main():
     to_method = os.environ.get("TOMETHOD")
     to_delete = os.environ.get("TODELETE")
 
+    filepass_logger = logging.getLogger("filepass_logger")
+    filepass_logger.setLevel(logging.DEBUG)
+
+    handler = graypy.GELFTCPHandler(
+        os.environ.get("GREYLOG_SERVER"), int(os.environ.get("GREYLOG_PORT"))
+    )
+    filepass_logger.addHandler(handler)
+
+    handler_std = logging.StreamHandler(sys.stdout)
+    filepass_logger.addHandler(handler_std)
+
+    logger = logging.LoggerAdapter(
+        filepass_logger,
+        {
+            "from_method": from_method,
+            "from_user": from_user,
+            "from_svr": from_svr,
+            "from_port": from_port,
+            "from_share": from_share,
+            "from_dir": from_dir,
+            "from_filter": from_filter,
+            "to_method": to_method,
+            "to_user": to_user,
+            "to_svr": to_svr,
+            "to_port": to_port,
+            "to_share": to_share,
+            "to_dir": to_dir,
+            "integration": "filepass",
+            "filepass_name": os.environ.get("INTEGRATION_NAME"),
+        },
+    )
+
     # From File System
     if from_method == "ssh":
-        logger(0, "Create from SSH connection")
-        from_fs = ssh_connection(from_user, from_pw, from_svr, from_port, from_dir)
+        logger.debug("Create from SSH connection")
+        from_fs = ssh_connection(
+            logger, from_user, from_pw, from_svr, from_port, from_dir
+        )
 
     if from_method == "smb":
-        logger(0, "Create from SMB connection")
+        logger.debug("Create from SMB connection")
         from_fs = smb_connection(
-            from_user, from_pw, from_svr, from_port, from_share, from_dir
+            logger, from_user, from_pw, from_svr, from_port, from_share, from_dir
         )
 
     if from_method == "ftps":
-        logger(0, "Create from FTPS connection")
+        logger.debug("Create from FTPS connection")
         from_fs = ftps_connection(
-            from_user, from_pw, from_svr, from_port, True, from_dir
+            logger, from_user, from_pw, from_svr, from_port, True, from_dir
         )
 
     # To File System
     if to_method == "ssh":
-        logger(0, "Create to SSH connection")
-        to_fs = ssh_connection(to_user, to_pw, to_svr, to_port, to_dir)
+        logger.debug("Create to SSH connection")
+        to_fs = ssh_connection(logger, to_user, to_pw, to_svr, to_port, to_dir)
     if to_method == "smb":
-        logger(0, "Create to SMB connection")
-        to_fs = smb_connection(to_user, to_pw, to_svr, to_port, to_share, to_dir)
+        logger.debug("Create to SMB connection")
+        to_fs = smb_connection(
+            logger, to_user, to_pw, to_svr, to_port, to_share, to_dir
+        )
     if to_method == "ftps":
-        logger(0, "Create to FTPS connection")
-        to_fs = ftps_connection(to_user, to_pw, to_svr, to_port, True, to_dir)
+        logger.debug("Create to FTPS connection")
+        to_fs = ftps_connection(logger, to_user, to_pw, to_svr, to_port, True, to_dir)
 
     # Do the move
     walker = Walker(filter=[from_filter], ignore_errors=True, max_depth=1)
 
     for path in walker.files(from_fs):
-        logger(0, "File to move: {}".format(path))
+        logger.debug("File to move: {}".format(path))
 
         if to_delete == "yes" and to_fs.exists(path):
-            logger(0, "delete (to): {}".format(path))
+            logger.debug("delete (to): {}".format(path))
             if to_fs.exists(path):
                 try:
                     to_fs.remove(path)
                 except fs.errors.ResourceNotFound:
-                    logger(2, "(To) file ResourceNotFound: {}".format(path))
+                    logger.warning("(To) file ResourceNotFound: {}".format(path))
             else:
-                logger(1, "file {} not found".format(path))
+                logger.warning("file {} not found".format(path))
         else:
-            logger(0, "No delete (to): {}".format(path))
+            logger.debug("No delete (to): {}".format(path))
 
         # todo: document, paths with files should be at the lowest level (no sub dirs)
         transfer_file(from_fs, to_fs, path)
 
         if from_delete == "yes" and from_fs.exists(path):
-            logger(0, "delete (from): {}".format(path))
+            logger.debug("delete (from): {}".format(path))
             if from_fs.exists(path):
                 try:
                     from_fs.remove(path)
                 except fs.errors.ResourceNotFound:
-                    logger(2, "ResourceNotFound: {}".format(path))
+                    logger.warning("ResourceNotFound: {}".format(path))
             else:
-                logger(1, "file {} not found".format(path))
+                logger.warning("file {} not found".format(path))
 
         else:
-            logger(0, "No delete (from): {}".format(path))
+            logger.debug("No delete (from): {}".format(path))
 
     from_fs.close()
     to_fs.close()
