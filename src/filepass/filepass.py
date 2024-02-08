@@ -1,12 +1,12 @@
+import logging
+import os
 import sys
 
 import fs
-import os
-import fs.smbfs
 import fs.ftpfs
-from fs.walk import Walker
-import logging
+import fs.smbfs
 import graypy
+from fs.walk import Walker
 
 
 # File Transfer Types
@@ -64,7 +64,6 @@ def file_pass(
     to_method,
     to_delete,
 ):
-
     # From File System
     if from_method == "ssh":
         logger.debug("Create from SSH connection")
@@ -136,7 +135,6 @@ def file_pass(
 
 
 def main():
-
     # Load Environmental Variables
 
     # GREYLOG_SERVER
