@@ -1,1 +1,1 @@
-from .filepass import file_pass, smb_connection, ssh_connection
+from .filepass import file_pass, sftp_connection, smb_connection

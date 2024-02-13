@@ -5,9 +5,9 @@ from fs.walk import Walker
 
 
 # File Transfer Types
-def ssh_connection(logger, user, pw, svr, port, dir):
-    logger.debug("ssh://{}:{}@{}:{}{}".format(user, "passwordhere", svr, port, dir))
-    fs_conn = fs.open_fs("ssh://{}:{}@{}:{}{}".format(user, pw, svr, port, dir))
+def sftp_connection(logger, user, pw, svr, port, dir):
+    logger.debug("sftp://{}:{}@{}:{}{}".format(user, "passwordhere", svr, port, dir))
+    fs_conn = fs.open_fs("sftp://{}:{}@{}:{}{}".format(user, pw, svr, port, dir))
     return fs_conn
 
 
@@ -49,9 +49,9 @@ def file_pass(
     to_delete,
 ):
     # From File System
-    if from_method == "ssh":
-        logger.debug("Create from SSH connection")
-        from_fs = ssh_connection(
+    if from_method == "sftp":
+        logger.debug("Create from SFTP connection")
+        from_fs = sftp_connection(
             logger, from_user, from_pw, from_svr, from_port, from_dir
         )
 
@@ -62,9 +62,9 @@ def file_pass(
         )
 
     # To File System
-    if to_method == "ssh":
-        logger.debug("Create to SSH connection")
-        to_fs = ssh_connection(logger, to_user, to_pw, to_svr, to_port, to_dir)
+    if to_method == "sftp":
+        logger.debug("Create to SFTP connection")
+        to_fs = sftp_connection(logger, to_user, to_pw, to_svr, to_port, to_dir)
     if to_method == "smb":
         logger.debug("Create to SMB connection")
         to_fs = smb_connection(
@@ -106,4 +106,5 @@ def file_pass(
             logger.debug("No delete (from): {}".format(path))
 
     from_fs.close()
+
     to_fs.close()
