@@ -1,0 +1,24 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "filepass"
+version = "0.2.0"
+authors = [
+    { name="Orlund Norstrom", email="onorstrom@kamloops.ca" },
+    { name="Marco Lussetti", email="mlussetti@kamloops.ca" },
+    { name="Parul Parul", email="pparul@kamloops.ca" },
+]
+description = "Wrapper around fs libraries to synchronized files between different system types including SMB, SFTP, FSTP."
+readme = "README.md"
+license = { file="LICENSE" }
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/cityofkamloops/filepass"
+"Bug Tracker" = "https://github.com/cityofkamloops/filepass/issues"
