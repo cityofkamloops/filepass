@@ -1,7 +1,6 @@
 import logging
 import os
 import sys
-from sys import stdout
 
 import graypy
 
@@ -33,72 +32,40 @@ def main():
     to_share = os.environ.get("TOSMBSHARE")
     to_method = os.environ.get("TOMETHOD")
     to_delete = os.environ.get("TODELETE")
-    # Environment variable added for using local or Graylog logging
-    use_graylog = os.environ.get("USE_GRAYLOG")
 
-    if use_graylog == "yes":
-        filepass_logger = logging.getLogger("filepass_logger")
-        filepass_logger.setLevel(logging.DEBUG)
+    filepass_logger = logging.getLogger("filepass_logger")
+    filepass_logger.setLevel(logging.DEBUG)
 
+    # Check if GRAYLOG SERVER configurations are set and add handler accordingly
+    if os.environ.get("GRAYLOG_SERVER") and os.environ.get("GRAYLOG_PORT") is not None:
         handler = graypy.GELFTCPHandler(
             os.environ.get("GRAYLOG_SERVER"), int(os.environ.get("GRAYLOG_PORT"))
         )
         filepass_logger.addHandler(handler)
 
-        handler_std = logging.StreamHandler(sys.stdout)
-        filepass_logger.addHandler(handler_std)
+    handler_std = logging.StreamHandler(sys.stdout)
+    filepass_logger.addHandler(handler_std)
 
-        logger = logging.LoggerAdapter(
-            filepass_logger,
-            {
-                "from_method": from_method,
-                "from_user": from_user,
-                "from_svr": from_svr,
-                "from_port": from_port,
-                "from_share": from_share,
-                "from_dir": from_dir,
-                "from_filter": from_filter,
-                "to_method": to_method,
-                "to_user": to_user,
-                "to_svr": to_svr,
-                "to_port": to_port,
-                "to_share": to_share,
-                "to_dir": to_dir,
-                "integration": "filepass",
-                "filepass_name": os.environ.get("INTEGRATION_NAME"),
-            },
-        )
-
-    else:
-        # Docker logger output to stdout
-        logFormatter = logging.Formatter(
-            "%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s"
-        )
-        local_logger = logging.getLogger("local_logger")
-        local_logger.setLevel(logging.DEBUG)
-        consoleHandler = logging.StreamHandler(stdout)
-        consoleHandler.setFormatter(logFormatter)
-        local_logger.addHandler(consoleHandler)
-        logger = logging.LoggerAdapter(
-            local_logger,
-            {
-                "from_method": from_method,
-                "from_user": from_user,
-                "from_svr": from_svr,
-                "from_port": from_port,
-                "from_share": from_share,
-                "from_dir": from_dir,
-                "from_filter": from_filter,
-                "to_method": to_method,
-                "to_user": to_user,
-                "to_svr": to_svr,
-                "to_port": to_port,
-                "to_share": to_share,
-                "to_dir": to_dir,
-                "integration": "filepass",
-                "filepass_name": os.environ.get("INTEGRATION_NAME"),
-            },
-        )
+    logger = logging.LoggerAdapter(
+        filepass_logger,
+        {
+            "from_method": from_method,
+            "from_user": from_user,
+            "from_svr": from_svr,
+            "from_port": from_port,
+            "from_share": from_share,
+            "from_dir": from_dir,
+            "from_filter": from_filter,
+            "to_method": to_method,
+            "to_user": to_user,
+            "to_svr": to_svr,
+            "to_port": to_port,
+            "to_share": to_share,
+            "to_dir": to_dir,
+            "integration": "filepass",
+            "filepass_name": os.environ.get("INTEGRATION_NAME"),
+        },
+    )
     try:
         file_pass(
             logger,
