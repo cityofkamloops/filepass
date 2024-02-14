@@ -32,6 +32,8 @@ def main():
     to_share = os.environ.get("TOSMBSHARE")
     to_method = os.environ.get("TOMETHOD")
     to_delete = os.environ.get("TODELETE")
+    # Environment variable added for filename change in single file mode
+    new_filename = os.environ.get("NEW_FILENAME")
 
     filepass_logger = logging.getLogger("filepass_logger")
     filepass_logger.setLevel(logging.DEBUG)
@@ -64,6 +66,7 @@ def main():
             "to_dir": to_dir,
             "integration": "filepass",
             "filepass_name": os.environ.get("INTEGRATION_NAME"),
+            "new_filename": new_filename,
         },
     )
     try:
@@ -86,6 +89,7 @@ def main():
             to_share,
             to_method,
             to_delete,
+            new_filename,
         )
     except:
         logger.exception("Critical error found", stack_info=True)
