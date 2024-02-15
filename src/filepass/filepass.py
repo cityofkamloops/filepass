@@ -5,9 +5,9 @@ from fs.walk import Walker
 
 
 # File Transfer Types
-def ssh_connection(logger, user, pw, svr, port, dir):
-    logger.debug("ssh://{}:{}@{}:{}{}".format(user, "passwordhere", svr, port, dir))
-    fs_conn = fs.open_fs("ssh://{}:{}@{}:{}{}".format(user, pw, svr, port, dir))
+def sftp_connection(logger, user, pw, svr, port, dir):
+    logger.debug("sftp://{}:{}@{}:{}{}".format(user, "passwordhere", svr, port, dir))
+    fs_conn = fs.open_fs("sftp://{}:{}@{}:{}{}".format(user, pw, svr, port, dir))
     return fs_conn
 
 
@@ -24,8 +24,10 @@ def smb_connection(logger, user, pw, svr, port, smbshare, dir):
     return fs_conn
 
 
-def transfer_file(from_fs, to_fs, filename):
-    to_fs.writefile(filename, from_fs.open(filename, "rb"))
+# Boolean parameter to add ability to rename target file in single file mode
+def transfer_file(from_fs, to_fs, filename, should_rename=False, new_filename=None):
+    target_filename = new_filename if new_filename and should_rename else filename
+    to_fs.writefile(target_filename, from_fs.open(filename, "rb"))
 
 
 def file_pass(
@@ -47,11 +49,12 @@ def file_pass(
     to_share,
     to_method,
     to_delete,
+    new_filename=None,
 ):
     # From File System
-    if from_method == "ssh":
-        logger.debug("Create from SSH connection")
-        from_fs = ssh_connection(
+    if from_method == "sftp":
+        logger.debug("Create from SFTP connection")
+        from_fs = sftp_connection(
             logger, from_user, from_pw, from_svr, from_port, from_dir
         )
 
@@ -62,9 +65,9 @@ def file_pass(
         )
 
     # To File System
-    if to_method == "ssh":
-        logger.debug("Create to SSH connection")
-        to_fs = ssh_connection(logger, to_user, to_pw, to_svr, to_port, to_dir)
+    if to_method == "sftp":
+        logger.debug("Create to SFTP connection")
+        to_fs = sftp_connection(logger, to_user, to_pw, to_svr, to_port, to_dir)
     if to_method == "smb":
         logger.debug("Create to SMB connection")
         to_fs = smb_connection(
@@ -73,7 +76,8 @@ def file_pass(
 
     # Do the move
     walker = Walker(filter=[from_filter], ignore_errors=True, max_depth=1)
-
+    # Create a list of files to be transferred based on the filter.
+    total_files = list(walker.files(from_fs))
     for path in walker.files(from_fs):
         logger.debug("File to move: {}".format(path))
 
@@ -89,8 +93,13 @@ def file_pass(
         else:
             logger.debug("No delete (to): {}".format(path))
 
-        # todo: document, paths with files should be at the lowest level (no sub dirs)
-        transfer_file(from_fs, to_fs, path)
+        # Confirm if single file mode condition is satisfied
+        if len(total_files) == 1 and new_filename:
+            should_rename = True
+        else:
+            should_rename = False
+
+        transfer_file(from_fs, to_fs, path, should_rename, new_filename=new_filename)
 
         if from_delete == "yes" and from_fs.exists(path):
             logger.debug("delete (from): {}".format(path))
@@ -106,4 +115,5 @@ def file_pass(
             logger.debug("No delete (from): {}".format(path))
 
     from_fs.close()
+
     to_fs.close()
