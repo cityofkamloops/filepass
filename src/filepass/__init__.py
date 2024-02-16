@@ -1,1 +1,7 @@
-from .filepass import file_pass, sftp_connection, smb_connection
+from .filepass import (
+    file_pass,
+    local_connection,
+    osfs_connection,
+    sftp_connection,
+    smb_connection,
+)

@@ -24,6 +24,19 @@ def smb_connection(logger, user, pw, svr, port, smbshare, dir):
     return fs_conn
 
 
+def local_connection(logger, dir: str):
+    """Establishes a connection to a directory on the local filesystem"""
+    logger.debug("local connection to {}".format(dir))
+    fs_conn = fs.open_fs("{}".format(dir))
+    return fs_conn
+
+
+def osfs_connection(logger, dir):
+    logger.debug("osfs dir: {}".format(dir))
+    fs_conn = fs.open_fs(dir)
+    return fs_conn
+
+
 # Boolean parameter to add ability to rename target file in single file mode
 def transfer_file(from_fs, to_fs, filename, should_rename=False, new_filename=None):
     target_filename = new_filename if new_filename and should_rename else filename
@@ -64,15 +77,32 @@ def file_pass(
             logger, from_user, from_pw, from_svr, from_port, from_share, from_dir
         )
 
+    if from_method == "local":
+        logger.debug("Create from local/osfs connection")
+        from_fs = local_connection(logger, from_dir)
+
+    if from_method == "osfs":
+        logger.debug("Create osfs connection")
+        from_fs = osfs_connection(logger, from_dir)
+
     # To File System
     if to_method == "sftp":
         logger.debug("Create to SFTP connection")
         to_fs = sftp_connection(logger, to_user, to_pw, to_svr, to_port, to_dir)
+
     if to_method == "smb":
         logger.debug("Create to SMB connection")
         to_fs = smb_connection(
             logger, to_user, to_pw, to_svr, to_port, to_share, to_dir
         )
+
+    if to_method == "local":
+        logger.debug("Create from local connection")
+        to_fs = local_connection(logger, to_dir)
+
+    if to_method == "osfs":
+        logger.debug("Create to OSFS connection")
+        to_fs = osfs_connection(logger, to_dir)
 
     # Do the move
     walker = Walker(filter=[from_filter], ignore_errors=True, max_depth=1)
