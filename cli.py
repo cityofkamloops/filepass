@@ -4,35 +4,36 @@ import sys
 
 import graypy
 
-from src.filepass import file_pass
+from src.filepass import ConnectionDetails, file_pass
 
 
 def main():
     # Load Environmental Variables
 
-    # GREYLOG_SERVER
-    # GREYLOG_PORT
-    # INTEGRATION_NAME
+    # Connection objects
+    from_conn = ConnectionDetails(
+        method=os.environ.get("FROMMETHOD"),
+        user=os.environ.get("FROMUSER"),
+        password=os.environ.get("FROMPW"),
+        server=os.environ.get("FROMSVR"),
+        port=os.environ.get("FROMPORT"),
+        dir=os.environ.get("FROMDIR"),
+        share=os.environ.get("FROMSMBSHARE"),
+    )
 
-    from_user = os.environ.get("FROMUSER")
-    from_pw = os.environ.get("FROMPW")
-    from_svr = os.environ.get("FROMSVR")
-    from_port = os.environ.get("FROMPORT")
-    from_dir = os.environ.get("FROMDIR")
-    from_share = os.environ.get("FROMSMBSHARE")
-    from_method = os.environ.get("FROMMETHOD")
+    to_conn = ConnectionDetails(
+        method=os.environ.get("TOMETHOD"),
+        user=os.environ.get("TOUSER"),
+        password=os.environ.get("TOPW"),
+        server=os.environ.get("TOSVR"),
+        port=os.environ.get("TOPORT"),
+        dir=os.environ.get("TODIR"),
+        share=os.environ.get("TOSMBSHARE"),
+    )
+
     from_delete = os.environ.get("FROMDELETE")
     from_filter = os.environ.get("FROMFILEFILTER")
-
-    to_user = os.environ.get("TOUSER")
-    to_pw = os.environ.get("TOPW")
-    to_svr = os.environ.get("TOSVR")
-    to_port = os.environ.get("TOPORT")
-    to_dir = os.environ.get("TODIR")
-    to_share = os.environ.get("TOSMBSHARE")
-    to_method = os.environ.get("TOMETHOD")
     to_delete = os.environ.get("TODELETE")
-    # Environment variable added for filename change in single file mode
     new_filename = os.environ.get("NEW_FILENAME")
 
     filepass_logger = logging.getLogger("filepass_logger")
@@ -51,19 +52,11 @@ def main():
     logger = logging.LoggerAdapter(
         filepass_logger,
         {
-            "from_method": from_method,
-            "from_user": from_user,
-            "from_svr": from_svr,
-            "from_port": from_port,
-            "from_share": from_share,
-            "from_dir": from_dir,
+            "from_conn": from_conn,
+            "from_delete": from_delete,
             "from_filter": from_filter,
-            "to_method": to_method,
-            "to_user": to_user,
-            "to_svr": to_svr,
-            "to_port": to_port,
-            "to_share": to_share,
-            "to_dir": to_dir,
+            "to_conn": to_conn,
+            "to_delete": to_delete,
             "integration": "filepass",
             "filepass_name": os.environ.get("INTEGRATION_NAME"),
             "new_filename": new_filename,
@@ -72,22 +65,10 @@ def main():
     try:
         file_pass(
             logger,
-            from_user,
-            from_pw,
-            from_svr,
-            from_port,
-            from_dir,
-            from_share,
-            from_method,
+            from_conn,
             from_delete,
             from_filter,
-            to_user,
-            to_pw,
-            to_svr,
-            to_port,
-            to_dir,
-            to_share,
-            to_method,
+            to_conn,
             to_delete,
             new_filename,
         )
