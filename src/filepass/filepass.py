@@ -52,15 +52,8 @@ def smb_connection(logger, conn_details: ConnectionDetails):
     return fs_conn
 
 
-def local_connection(logger, conn_details: ConnectionDetails):
-    """Establishes a connection to a directory on the local filesystem"""
-    logger.debug("local connection to {}".format(conn_details.dir))
-    fs_conn = fs.open_fs("{}".format(conn_details.dir))
-    return fs_conn
-
-
 def osfs_connection(logger, conn_details: ConnectionDetails):
-    logger.debug("osfs dir: {}".format(conn_details.dir))
+    logger.debug("osfs/local connection to dir: {}".format(conn_details.dir))
     fs_conn = fs.open_fs(conn_details.dir)
     return fs_conn
 
@@ -83,7 +76,7 @@ def file_pass(
     connection_functions = {
         "sftp": sftp_connection,
         "smb": smb_connection,
-        "local": local_connection,
+        "local": osfs_connection,
         "osfs": osfs_connection,
     }
 

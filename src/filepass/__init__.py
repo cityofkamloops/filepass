@@ -1,10 +1,4 @@
-from .filepass import (
-    file_pass,
-    local_connection,
-    osfs_connection,
-    sftp_connection,
-    smb_connection,
-)
+from .filepass import file_pass, osfs_connection, sftp_connection, smb_connection
 from .filepass_config import ConnectionDetails
 
 __all__ = [
