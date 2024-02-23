@@ -36,7 +36,9 @@ pip install filepass
 
 2. Set up connection - create a connection object (ConnectionDetails) based on your protocol of choice. FilepassMethod offers three protocols: SFTP, SMB, and LOCAL
     e.g.:
-        ```
+
+        ```python
+
         sourceServer = ConnectionDetails(
         method=FilepassMethod.SMB,
         user="user",
@@ -55,6 +57,7 @@ pip install filepass
             port="portnumber",
             dir="directory/folder",
         )
+        ```
 
 
 3. Configure Logging:
@@ -64,7 +67,7 @@ pip install filepass
         * Import the required library for custom logging - import graypy
         * Add the handler to your defined logger:
 
-            ```
+            ```python
             handler = graypy. graypy.GELFTCPHandler(
                 ("servername"), int("portnumber")
             )
@@ -79,7 +82,8 @@ pip install filepass
 4. Define the required parameters for file transfer:
     * from_filter = "filename/wildcard"
         * e.g.
-            ```from_filter = "*.txt"  #transfers all files in the directory, with .txt extension.
+            ```python
+            from_filter = "*.txt"  #transfers all files in the directory, with .txt extension.
             from_filter = "transfer_file.csv"  #transfers the selected file.```
     * to_delete = "yes or no".
     * from_delete = "yes or no".
@@ -87,13 +91,17 @@ pip install filepass
 
 5. Rename file in single file transfer mode:
     Rename a file during transfer by specifying the new_filename parameter such as:
-    * e.g., ```new_filename = "newfilename"```
+    * e.g.,
+    ```python
+    new_filename = "newfilename"
+    ```
+
     Defaults to 'None', if parameter is not defined.
 
 6. Transfer Files:
     Use the file_pass method to move files to move files from one location to another.
     * e.g.,
-        ```
+        ```python
         file_pass(
             logger,
             from_conn,
