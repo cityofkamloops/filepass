@@ -32,13 +32,13 @@ pip install filepass
 
 ## Quick Start ##
 1. Import Filepass package:
-    e.g.: from filepass import file_pass, ConnectionDetails, FilepassMethod
+    e.g.:
+    ```from filepass import file_pass, ConnectionDetails, FilepassMethod```
 
 2. Set up connection - create a connection object (ConnectionDetails) based on your protocol of choice. FilepassMethod offers three protocols: SFTP, SMB, and LOCAL
     e.g.:
 
         ```python
-
         sourceServer = ConnectionDetails(
         method=FilepassMethod.SMB,
         user="user",
@@ -47,8 +47,7 @@ pip install filepass
         port="portnumber",
         dir="directory/folder",
         share="SMB share",
-    )
-
+        )
         destinationServer = ConnectionDetails(
             method=FilepassMethod.SFTP,
             user="user",
