@@ -3,11 +3,18 @@ import fs.ftpfs
 import fs.smbfs
 from fs.walk import Walker
 
-from .filepass_config import ConnectionDetails
+from .filepass_config import ConnectionDetails, FilepassMethod
 
 
 # File Transfer Types
 def sftp_connection(logger, conn_details: ConnectionDetails):
+    """
+    Establishes an SFTP connection based on provided connection details.
+    Parameters:
+        logger (Logger): logger object for logging messages.
+        conn_details: Object containing connection details: user, password, server, port and directory (required).
+                        port defaults to '22', if not explictly defined.
+    """
     logger.debug(
         "sftp://{}:{}@{}:{}{}".format(
             conn_details.user,
@@ -30,6 +37,13 @@ def sftp_connection(logger, conn_details: ConnectionDetails):
 
 
 def smb_connection(logger, conn_details: ConnectionDetails):
+    """
+    Establishes an SMB connection based on provided connection details.
+    Parameters:
+        logger (Logger): logger object for logging messages.
+        conn_details: Object containing connection details: user, password, server, port, share, and directory (required).
+                        port defaults to '445', if not explictly defined.
+    """
     logger.debug(
         "smb://{}:{}@{}:{}/{}".format(
             conn_details.user,
@@ -53,6 +67,12 @@ def smb_connection(logger, conn_details: ConnectionDetails):
 
 
 def osfs_connection(logger, conn_details: ConnectionDetails):
+    """
+    Establishes an LOCAL connection based on provided connection details.
+    Parameters:
+        logger (Logger): logger object for logging messages.
+        conn_details: Object containing connection details: directory (required).
+    """
     logger.debug("osfs/local connection to dir: {}".format(conn_details.dir))
     fs_conn = fs.open_fs(conn_details.dir)
     return fs_conn
@@ -60,6 +80,9 @@ def osfs_connection(logger, conn_details: ConnectionDetails):
 
 # Boolean parameter to add ability to rename target file in single file mode
 def transfer_file(from_fs, to_fs, filename, should_rename=False, new_filename=None):
+    """
+    Transfer file using 'fs' and rename file in single file mode (new_filename required)
+    """
     target_filename = new_filename if new_filename and should_rename else filename
     to_fs.writefile(target_filename, from_fs.open(filename, "rb"))
 
@@ -74,20 +97,19 @@ def file_pass(
     new_filename=None,
 ):
     connection_functions = {
-        "sftp": sftp_connection,
-        "smb": smb_connection,
-        "local": osfs_connection,
-        "osfs": osfs_connection,
+        FilepassMethod.SFTP: sftp_connection,
+        FilepassMethod.SMB: smb_connection,
+        FilepassMethod.LOCAL: osfs_connection,
     }
 
     from_fs = connection_functions[from_conn.method](logger, from_conn)
     to_fs = connection_functions[to_conn.method](logger, to_conn)
 
     logger.debug(
-        f"Establishing connection 'from' server: {from_conn.server}, using method: {from_conn.method} \n Directory selected: {from_conn.dir}"
+        f"Establishing {from_conn.method} connection from server: {from_conn.server}\n Directory: {from_conn.dir}"
     )
     logger.debug(
-        f"Establishing connection 'to' server: {to_conn.server}, using method: {to_conn.method} \n Directory selected: {to_conn.dir}"
+        f"Establishing {to_conn.method} connection from server: {to_conn.server}\n Directory: {to_conn.dir}"
     )
     # Do the move
     walker = Walker(filter=[from_filter], ignore_errors=True, max_depth=1)

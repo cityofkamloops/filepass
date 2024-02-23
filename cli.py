@@ -4,7 +4,7 @@ import sys
 
 import graypy
 
-from src.filepass import ConnectionDetails, file_pass
+from src.filepass import ConnectionDetails, FilepassMethod, file_pass
 
 
 def main():
@@ -12,7 +12,7 @@ def main():
 
     # Connection objects
     from_conn = ConnectionDetails(
-        method=os.environ.get("FROMMETHOD"),
+        method=FilepassMethod.SFTP,
         user=os.environ.get("FROMUSER"),
         password=os.environ.get("FROMPW"),
         server=os.environ.get("FROMSVR"),
@@ -22,7 +22,7 @@ def main():
     )
 
     to_conn = ConnectionDetails(
-        method=os.environ.get("TOMETHOD"),
+        method=FilepassMethod.SMB,
         user=os.environ.get("TOUSER"),
         password=os.environ.get("TOPW"),
         server=os.environ.get("TOSVR"),
@@ -31,6 +31,7 @@ def main():
         share=os.environ.get("TOSMBSHARE"),
     )
 
+    # Parameters required by file_pass
     from_delete = os.environ.get("FROMDELETE")
     from_filter = os.environ.get("FROMFILEFILTER")
     to_delete = os.environ.get("TODELETE")
