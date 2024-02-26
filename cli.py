@@ -10,9 +10,42 @@ from src.filepass import ConnectionDetails, FilepassMethod, file_pass
 def main():
     # Load Environmental Variables
 
+    """
+    Assign environment variabled to call the desired method for file transfer.
+    Can also opt to use the method directly such as:
+    from_conn = ConnectionDetails(
+         method = FilepassMethod.SMB
+    )
+    """
+    from_protocol = os.environ.get("FROMMETHOD").upper()
+
+    if from_protocol == "SMB":
+        from_method = FilepassMethod.SMB
+    elif from_protocol == "SFTP":
+        from_method = FilepassMethod.SFTP
+    elif from_protocol == "LOCAL":
+        from_method = FilepassMethod.LOCAL
+    else:
+        raise ValueError(
+            f"Unsupported Connection Method from: {from_protocol}. \n Please choose a supported method: SFTP, SMB or LOCAL."
+        )
+
+    to_protocol = os.environ.get("TOMETHOD").upper()
+
+    if to_protocol == "SMB":
+        to_method = FilepassMethod.SMB
+    elif to_protocol == "SFTP":
+        to_method = FilepassMethod.SFTP
+    elif to_protocol == "LOCAL":
+        to_method = FilepassMethod.LOCAL
+    else:
+        raise ValueError(
+            f"Unsupported Connection Method to: {to_protocol}. \n Please choose a supported method: SFTP, SMB or LOCAL."
+        )
+
     # Connection objects
     from_conn = ConnectionDetails(
-        method=FilepassMethod.SFTP,
+        method=from_method,
         user=os.environ.get("FROMUSER"),
         password=os.environ.get("FROMPW"),
         server=os.environ.get("FROMSVR"),
@@ -22,7 +55,7 @@ def main():
     )
 
     to_conn = ConnectionDetails(
-        method=FilepassMethod.SMB,
+        method=to_method,
         user=os.environ.get("TOUSER"),
         password=os.environ.get("TOPW"),
         server=os.environ.get("TOSVR"),
