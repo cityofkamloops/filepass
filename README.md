@@ -115,33 +115,34 @@ pip install filepass
 ## Support ##
 If you encounter any issues or have questions, please file an issue on our [GitHub Issues Page](https://github.com/cityofkamloops/filepass/issues)
 
+
 ## Contributing ##
 Contributions to Filepass are welcome! Please refer to our [Contribution Guidelines](https://docs.github.com/en/contributing)
-    ### Ways to Contribute ###
-        * Submit bug reports and feature requests.
-        * Write and improve documentation.
-        * Write code for new features and bug fixes.
-        * Review pull requests.
-        * Enhance the package's test coverage.
+### Ways to Contribute ###
+    * Submit bug reports and feature requests.
+    * Write and improve documentation.
+    * Write code for new features and bug fixes.
+    * Review pull requests.
+    * Enhance the package's test coverage.
 
-    ### Code of Conduct ###
-        - Participation in this project is governed by The City of Kamloops Code of Conduct. We expect everyone to uphold the principles of respect, kindness and cooperation.
+### Code of Conduct ###
+    - Participation in this project is governed by The City of Kamloops Code of Conduct. We expect everyone to uphold the principles of respect, kindness and cooperation.
 
-    ### How to submit contributions ###
-    * Reporting bugs:
-       - Use the issue tracker to report bugs.
-       - Describe the bug and include steps to reproduce.
+### How to submit contributions ###
+* Reporting bugs:
+    - Use the issue tracker to report bugs.
+    - Describe the bug and include steps to reproduce.
 
-    * Feature Requests:
-        - Submit feature requests using the issue tracker.
-        - Please include an explanation why the feature would be useful, and how it should work if possible.
+* Feature Requests:
+    - Submit feature requests using the issue tracker.
+    - Please include an explanation why the feature would be useful, and how it should work if possible.
 
-    * Pull Requests:
-        - Fork the repository and create your branch from 'main'.
-        - If you have added code, please include tests.
-        - Ensure your project lints and follows the project's coding conventions.
-        - Write a clear and descriptive commit message.
-        - Open a pull request with a clear title and description.
+* Pull Requests:
+    - Fork the repository and create your branch from 'main'.
+    - If you have added code, please include tests.
+    - Ensure your project lints and follows the project's coding conventions.
+    - Write a clear and descriptive commit message.
+    - Open a pull request with a clear title and description.
 
 ## Thank you!! ##
 
