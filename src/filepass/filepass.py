@@ -1,3 +1,5 @@
+import sys
+
 import fs
 import fs.ftpfs
 import fs.smbfs
@@ -94,6 +96,7 @@ def file_pass(
     from_filter,
     to_conn: ConnectionDetails,
     to_delete,
+    file_overwrite,
     new_filename=None,
 ):
     connection_functions = {
@@ -118,7 +121,7 @@ def file_pass(
     for path in walker.files(from_fs):
         logger.debug("File to move: {}".format(path))
 
-        if to_delete == "yes" and to_fs.exists(path):
+        if to_delete.upper() == "YES" and to_fs.exists(path):
             logger.debug("delete (to): {}".format(path))
             if to_fs.exists(path):
                 try:
@@ -130,26 +133,39 @@ def file_pass(
         else:
             logger.debug("No delete (to): {}".format(path))
 
-        # Confirm if single file mode condition is satisfied
-        if len(total_files) == 1 and new_filename:
-            should_rename = True
+        # No overwrite feature
+        # Check the environment variable status and if the file exists
+        if file_overwrite.upper() == "NO" and to_fs.exists(path):
+            try:
+                sys.exit(0)
+            except SystemExit:
+                logger.debug(
+                    f"File overwrite is disabled. \nNo files will be transferred - {path}"
+                )
+                pass
         else:
-            should_rename = False
-
-        transfer_file(from_fs, to_fs, path, should_rename, new_filename=new_filename)
-
-        if from_delete == "yes" and from_fs.exists(path):
-            logger.debug("delete (from): {}".format(path))
-            if from_fs.exists(path):
-                try:
-                    from_fs.remove(path)
-                except fs.errors.ResourceNotFound:
-                    logger.warning("ResourceNotFound: {}".format(path))
+            # Confirm if single file mode condition is satisfied
+            if len(total_files) == 1 and new_filename:
+                should_rename = True
             else:
-                logger.warning("file {} not found".format(path))
+                should_rename = False
 
-        else:
-            logger.debug("No delete (from): {}".format(path))
+            transfer_file(
+                from_fs, to_fs, path, should_rename, new_filename=new_filename
+            )
+
+            if from_delete.upper() == "YES" and from_fs.exists(path):
+                logger.debug("delete (from): {}".format(path))
+                if from_fs.exists(path):
+                    try:
+                        from_fs.remove(path)
+                    except fs.errors.ResourceNotFound:
+                        logger.warning("ResourceNotFound: {}".format(path))
+                else:
+                    logger.warning("file {} not found".format(path))
+
+            else:
+                logger.debug("No delete (from): {}".format(path))
 
     from_fs.close()
 
