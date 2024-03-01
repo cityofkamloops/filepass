@@ -69,6 +69,7 @@ def main():
     from_filter = os.environ.get("FROMFILEFILTER")
     to_delete = os.environ.get("TODELETE")
     new_filename = os.environ.get("NEW_FILENAME")
+    file_overwrite = os.environ.get("FILE_OVERWRITE")
 
     filepass_logger = logging.getLogger("filepass_logger")
     filepass_logger.setLevel(logging.DEBUG)
@@ -93,6 +94,7 @@ def main():
             "to_delete": to_delete,
             "integration": "filepass",
             "filepass_name": os.environ.get("INTEGRATION_NAME"),
+            "file_overwrite": file_overwrite,
             "new_filename": new_filename,
         },
     )
@@ -104,6 +106,7 @@ def main():
             from_filter,
             to_conn,
             to_delete,
+            file_overwrite,
             new_filename,
         )
     except:
