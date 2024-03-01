@@ -136,13 +136,8 @@ def file_pass(
         # No overwrite feature
         # Check the environment variable status and if the file exists
         if file_overwrite.upper() == "NO" and to_fs.exists(path):
-            try:
-                sys.exit(0)
-            except SystemExit:
-                logger.debug(
-                    f"File overwrite is disabled. \nNo files will be transferred - {path}"
-                )
-                pass
+            logger.debug(f"File overwrite is disabled. \nFile {path} not transferred")
+            pass
         else:
             # Confirm if single file mode condition is satisfied
             if len(total_files) == 1 and new_filename:
