@@ -1,4 +1,5 @@
 import sys
+from urllib.parse import quote
 
 import fs
 import fs.ftpfs
@@ -28,8 +29,8 @@ def sftp_connection(logger, conn_details: ConnectionDetails):
     )
     fs_conn = fs.open_fs(
         "sftp://{}:{}@{}:{}{}".format(
-            conn_details.user,
-            conn_details.password,
+            quote(conn_details.user),
+            quote(conn_details.password),
             conn_details.server,
             conn_details.port,
             conn_details.dir,
@@ -57,8 +58,8 @@ def smb_connection(logger, conn_details: ConnectionDetails):
     )
     fs_conn = fs.open_fs(
         "smb://{}:{}@{}:{}/{}?direct-tcp=True&name-port=139&timeout=15&domain=".format(
-            conn_details.user,
-            conn_details.password,
+            quote(conn_details.user),
+            quote(conn_details.password),
             conn_details.server,
             conn_details.port,
             conn_details.share + conn_details.dir,
@@ -118,6 +119,7 @@ def file_pass(
     walker = Walker(filter=[from_filter], ignore_errors=True, max_depth=1)
     # Create a list of files to be transferred based on the filter.
     total_files = list(walker.files(from_fs))
+    print("Files to move: ", len(total_files))
     for path in walker.files(from_fs):
         logger.debug("File to move: {}".format(path))
 
