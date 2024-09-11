@@ -119,7 +119,6 @@ def file_pass(
     walker = Walker(filter=[from_filter], ignore_errors=True, max_depth=1)
     # Create a list of files to be transferred based on the filter.
     total_files = list(walker.files(from_fs))
-    print("Files to move: ", len(total_files))
     for path in walker.files(from_fs):
         logger.debug("File to move: {}".format(path))
 
