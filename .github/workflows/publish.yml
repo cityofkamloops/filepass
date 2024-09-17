@@ -5,7 +5,7 @@ on:
     branches:
       - 'main'
     tags:
-      - 'v.1*.*' # Trigger workflow on version tags v1.0.0 onwards
+      - 'v1.*.*' # Trigger workflow on version tags v1.0.0 onwards
 
 
 jobs:
