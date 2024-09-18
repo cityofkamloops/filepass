@@ -4,11 +4,29 @@ build-backend = "hatchling.build"
 
 [project]
 name = "filepass"
-version = "1.0.1"
+version = "1.0.2"
 authors = [
     { name="Orlund Norstrom", email="onorstrom@kamloops.ca" },
     { name="Marco Lussetti", email="mlussetti@kamloops.ca" },
     { name="Parul Parul", email="pparul@kamloops.ca" },
+]
+dependencies = [
+    "appdirs==1.4.4",
+    "bcrypt==4.1.2",
+    "cffi==1.16.0",
+    "cryptography==42.0.2",
+    "fs==2.4.16",
+    "fs.smbfs==1.0.7",
+    "fs.sshfs==1.0.2",
+    "graypy==2.1.0",
+    "paramiko==3.4.0",
+    "property-cached==1.6.4",
+    "pyasn1==0.5.1",
+    "pycparser==2.21",
+    "PyNaCl==1.5.0",
+    "pysmb==1.2.9.1",
+    "six==1.16.0",
+    "tqdm==4.66.2",
 ]
 description = "Wrapper around fs libraries to synchronized files between different system types including SMB, SFTP, FSTP."
 readme = "README.md"
