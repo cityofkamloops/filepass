@@ -2,8 +2,6 @@ name: Publish Filepass Python Package to PyPI
 
 on:
   push:
-    branches:
-      - 'main'
     tags:
       - 'v1.*.*' # Trigger workflow on version tags v1.0.0 onwards
 
@@ -18,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10.12"
+          python-version: "3.10"
       - name: Install pypa/build
         run: >-
           python3 -m
