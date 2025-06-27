@@ -57,12 +57,13 @@ def smb_connection(logger, conn_details: ConnectionDetails):
         )
     )
     fs_conn = fs.open_fs(
-        "smb://{}:{}@{}:{}/{}?direct-tcp=True&name-port=139&timeout=15&domain=".format(
+        "smb://{}:{}@{}:{}/{}?direct-tcp=True&name-port=139&timeout=15{}".format(
             quote(conn_details.user),
             quote(conn_details.password),
             conn_details.server,
             conn_details.port,
             conn_details.share + conn_details.dir,
+            f"&domain={conn_details.domain}" if conn_details.domain else ""
         )
     )
     # timeout, name - port, direct - tcp, hostname, and domain.

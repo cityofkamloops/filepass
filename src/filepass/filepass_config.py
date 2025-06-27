@@ -18,6 +18,7 @@ class ConnectionDetails:
         port=None,
         dir=None,
         share=None,
+        domain=None,
     ):
         self.method = method
         self.user = user
@@ -26,6 +27,7 @@ class ConnectionDetails:
         self.port = port
         self.dir = dir
         self.share = share
+        self.domain = domain
         # Ensure all required values are provided
         self._validate_parameters()
 
