@@ -156,16 +156,12 @@ def file_pass(
             )
             existing_dest_files.add(path)
 
-            if from_delete.upper() == "YES" and from_fs.exists(path):
+            if from_delete.upper() == "YES":
                 logger.debug("delete (from): {}".format(path))
-                if from_fs.exists(path):
-                    try:
-                        from_fs.remove(path)
-                    except fs.errors.ResourceNotFound:
-                        logger.warning("ResourceNotFound: {}".format(path))
-                else:
-                    logger.warning("file {} not found".format(path))
-
+                try:
+                    from_fs.remove(path)
+                except fs.errors.ResourceNotFound:
+                    logger.warning("ResourceNotFound: {}".format(path))
             else:
                 logger.debug("No delete (from): {}".format(path))
 
