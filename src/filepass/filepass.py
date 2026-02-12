@@ -34,6 +34,7 @@ def sftp_connection(logger, conn_details: ConnectionDetails):
         passwd=conn_details.password,
         port=int(conn_details.port),
         keepalive=10,
+        timeout=30,
     )
     if conn_details.dir:
         fs_conn = fs_conn.opendir(conn_details.dir)
