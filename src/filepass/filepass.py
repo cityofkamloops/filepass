@@ -4,6 +4,7 @@ from urllib.parse import quote
 import fs
 import fs.ftpfs
 import fs.smbfs
+from fs.sshfs import SSHFS
 from fs.walk import Walker
 
 from .filepass_config import ConnectionDetails, FilepassMethod
@@ -27,15 +28,15 @@ def sftp_connection(logger, conn_details: ConnectionDetails):
             conn_details.dir,
         )
     )
-    fs_conn = fs.open_fs(
-        "sftp://{}:{}@{}:{}{}".format(
-            quote(conn_details.user),
-            quote(conn_details.password),
-            conn_details.server,
-            conn_details.port,
-            conn_details.dir,
-        )
+    fs_conn = SSHFS(
+        host=conn_details.server,
+        user=conn_details.user,
+        passwd=conn_details.password,
+        port=int(conn_details.port),
+        keepalive=10,
     )
+    if conn_details.dir:
+        fs_conn = fs_conn.opendir(conn_details.dir)
     return fs_conn
 
 
