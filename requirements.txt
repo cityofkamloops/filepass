@@ -1,3 +1,4 @@
+setuptools==80.4.0
 appdirs==1.4.4
 bcrypt==4.1.2
 cffi==1.16.0
