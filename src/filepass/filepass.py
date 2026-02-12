@@ -4,6 +4,7 @@ from urllib.parse import quote
 import fs
 import fs.ftpfs
 import fs.smbfs
+from fs.sshfs import SSHFS
 from fs.walk import Walker
 
 from .filepass_config import ConnectionDetails, FilepassMethod
@@ -27,15 +28,16 @@ def sftp_connection(logger, conn_details: ConnectionDetails):
             conn_details.dir,
         )
     )
-    fs_conn = fs.open_fs(
-        "sftp://{}:{}@{}:{}{}".format(
-            quote(conn_details.user),
-            quote(conn_details.password),
-            conn_details.server,
-            conn_details.port,
-            conn_details.dir,
-        )
+    fs_conn = SSHFS(
+        host=conn_details.server,
+        user=conn_details.user,
+        passwd=conn_details.password,
+        port=int(conn_details.port),
+        keepalive=10,
+        timeout=30,
     )
+    if conn_details.dir:
+        fs_conn = fs_conn.opendir(conn_details.dir)
     return fs_conn
 
 
@@ -119,26 +121,29 @@ def file_pass(
     walker = Walker(filter=[from_filter], ignore_errors=True, max_depth=1)
     # Create a list of files to be transferred based on the filter.
     total_files = list(walker.files(from_fs))
-    for path in walker.files(from_fs):
+
+    # Pre-fetch destination file list to avoid per-file network round-trips
+    # this should speed up execution on large filesets
+    to_walker = Walker(ignore_errors=True, max_depth=1)
+    existing_dest_files = set(to_walker.files(to_fs))
+
+    for path in total_files:
         logger.debug("File to move: {}".format(path))
 
-        if to_delete.upper() == "YES" and to_fs.exists(path):
+        if to_delete.upper() == "YES" and path in existing_dest_files:
             logger.debug("delete (to): {}".format(path))
-            if to_fs.exists(path):
-                try:
-                    to_fs.remove(path)
-                except fs.errors.ResourceNotFound:
-                    logger.warning("(To) file ResourceNotFound: {}".format(path))
-            else:
-                logger.warning("file {} not found".format(path))
+            try:
+                to_fs.remove(path)
+                existing_dest_files.discard(path)
+            except fs.errors.ResourceNotFound:
+                logger.warning("(To) file ResourceNotFound: {}".format(path))
         else:
             logger.debug("No delete (to): {}".format(path))
 
         # No overwrite feature
         # Check the environment variable status and if the file exists
-        if file_overwrite.upper() == "NO" and to_fs.exists(path):
+        if file_overwrite.upper() == "NO" and path in existing_dest_files:
             logger.debug(f"File overwrite is disabled. \nFile {path} not transferred")
-            pass
         else:
             # Confirm if single file mode condition is satisfied
             if len(total_files) == 1 and new_filename:
@@ -149,17 +154,14 @@ def file_pass(
             transfer_file(
                 from_fs, to_fs, path, should_rename, new_filename=new_filename
             )
+            existing_dest_files.add(path)
 
-            if from_delete.upper() == "YES" and from_fs.exists(path):
+            if from_delete.upper() == "YES":
                 logger.debug("delete (from): {}".format(path))
-                if from_fs.exists(path):
-                    try:
-                        from_fs.remove(path)
-                    except fs.errors.ResourceNotFound:
-                        logger.warning("ResourceNotFound: {}".format(path))
-                else:
-                    logger.warning("file {} not found".format(path))
-
+                try:
+                    from_fs.remove(path)
+                except fs.errors.ResourceNotFound:
+                    logger.warning("ResourceNotFound: {}".format(path))
             else:
                 logger.debug("No delete (from): {}".format(path))
 
