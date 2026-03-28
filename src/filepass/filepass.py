@@ -100,7 +100,7 @@ def transfer_file(from_fs, to_fs, filename, should_rename=False, new_filename=No
     Transfer file using 'fs' and rename file in single file mode (new_filename required)
     """
     target_filename = new_filename if new_filename and should_rename else filename
-    with from_fs.open(filename, "rb", prefetch=False) as src_file:
+    with from_fs.open(filename, "rb") as src_file:
         to_fs.writefile(target_filename, src_file)
 
 
