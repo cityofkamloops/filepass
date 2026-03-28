@@ -159,7 +159,7 @@ def file_pass(
 
             # No overwrite feature
             # Check the environment variable status and if the file exists
-            if file_overwrite.upper() == "NO" and path in existing_dest_files:
+            if (file_overwrite or "YES").upper() == "NO" and path in existing_dest_files:
                 logger.debug(
                     f"[{index}/{total_count}] File overwrite is disabled. File {path} not transferred"
                 )
