@@ -9,6 +9,8 @@ from fs.sshfs import SSHFS
 from fs.walk import Walker
 
 from .filepass_config import ConnectionDetails, FilepassMethod
+import hashlib
+import io
 
 
 # File Transfer Types
@@ -97,12 +99,21 @@ def osfs_connection(logger, conn_details: ConnectionDetails):
 # Boolean parameter to add ability to rename target file in single file mode
 def transfer_file(from_fs, to_fs, filename, should_rename=False, new_filename=None):
     """
-    Transfer file using 'fs' and rename file in single file mode (new_filename required)
+    Transfer file using 'fs' and rename file in single file mode (new_filename required).
+    Verifies file integrity using MD5 checksum after transfer.
     """
     target_filename = new_filename if new_filename and should_rename else filename
-    with from_fs.open(filename, "rb", prefetch=False) as src_file:
-        to_fs.writefile(target_filename, src_file)
-
+    with from_fs.open(filename, "rb") as src_file:
+        data = src_file.read()
+    source_checksum = hashlib.md5(data).hexdigest()
+    to_fs.writefile(target_filename, io.BytesIO(data))
+    with to_fs.open(target_filename, "rb") as dest_file:
+        dest_checksum = hashlib.md5(dest_file.read()).hexdigest()
+    if source_checksum != dest_checksum:
+        raise ValueError(
+            f"Checksum mismatch for {filename}. "
+            f"Source: {source_checksum} Destination: {dest_checksum}"
+        )
 
 def file_pass(
     logger,
