@@ -13,7 +13,7 @@ This package is available as:
 ## Features ##
 
 - **Multiple Protocols Support**:
-Seamlessly transfer files using SFTP, SMB, and LOCAL file systems.
+Seamlessly transfer files using SFTP, SMB, and LOCAL file systems. SFTP is built directly on `paramiko`; SMB is built directly on `smbprotocol` (SMB 2/3).
 
 - **Flexible File Selection**:
 Use 'from_filter' parameter to specify exactly which files to transfer, supporting both specific filenames and wildcards for multiple files.
@@ -26,6 +26,9 @@ Utilize the pre-defined connnection objects for efficient and secure connections
 
 - **Conditional File Deletion**:
 Automatically delete older files at the destination before transfer using 'to_delete', or remove source files after a successful transfer using 'from_delete'.
+
+- **Hang Protection**:
+Per-operation timeouts on every SFTP and SMB call (paramiko channel `settimeout(60)`, smbprotocol `connection_timeout=60`), plus a per-file watchdog that bails the job after `FILEPASS_PER_FILE_TIMEOUT` seconds (default 600). Stuck servers fail fast instead of leaving the process blocked indefinitely.
 
 - **Advanced Logging**:
 Enable custom logging handler by defining the server name, port number and adding the handler to the logger defined. Otherwise, default to local logging to stdout for monitoring and troubleshooting.
@@ -99,8 +102,9 @@ e.g.
 from_filter = "*.txt"  #transfers all files in the directory, with .txt extension.
 from_filter = "transfer_file.csv"  #transfers the selected file.
 ```
-* to_delete = "yes or no".
-* from_delete = "yes or no".
+* to_delete = "yes" or "no" — delete matching file at destination before transfer.
+* from_delete = "yes" or "no" — delete source file after successful transfer (move semantics).
+* file_overwrite = "yes" or "no" — when "no", skip transfer if the file already exists at destination.
 * logger = set custom handler or local handler.
 
 5. Rename file in single file transfer mode:
@@ -113,19 +117,29 @@ new_filename = "newfilename"
 Defaults to 'None', if parameter is not defined.
 
 6. Transfer Files:
-Use the file_pass method to move files to move files from one location to another.
+Use the file_pass method to move files from one location to another. Parameter order:
 * e.g.,
 ```
 file_pass(
     logger,
     from_conn,
-    to_conn,
-    from_filter,
-    to_delete,
     from_delete,
-    new_filename,
+    from_filter,
+    to_conn,
+    to_delete,
+    file_overwrite,
+    new_filename,   # optional, defaults to None
 )
 ```
+
+## Tuning ##
+
+Optional environment variables for performance and reliability:
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `FILEPASS_CHUNK_BYTES` | `1048576` (1 MiB) | Read/write chunk size for streaming copies. Increase for large files over fast networks; decrease only if memory-constrained. |
+| `FILEPASS_PER_FILE_TIMEOUT` | `600` (seconds) | Per-file watchdog budget. If any single file's transfer exceeds this, the job aborts with `WatchdogTimeout` and exits non-zero so cron/scheduler can retry. |
 
 ## Support ##
 If you encounter any issues or have questions, please file an issue on our [GitHub Issues Page](https://github.com/cityofkamloops/filepass/issues)
