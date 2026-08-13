@@ -1,8 +1,7 @@
 FROM python:3.13-slim-trixie
 
 # Set before the apt step so it can point /etc/localtime at the same zone.
-ENV TZ=America/Vancouver \
-    PYTHONUNBUFFERED=1
+ENV TZ=America/Vancouver
 
 # tzdata-legacy carries the backward-compatibility aliases (Canada/Pacific,
 # US/Pacific), split out of tzdata in Debian 13. /etc/localtime is repointed
