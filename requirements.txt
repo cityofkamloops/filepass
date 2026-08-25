@@ -1,6 +1,6 @@
 appdirs==1.4.4
 bcrypt==4.1.2
-cffi==2.1.1  # 1.16.0 has no cp313 wheel; required by the 3.13 base image
+cffi==2.1.1
 cryptography==42.0.2
 fs==2.4.16
 fs.smbfs==1.0.7
