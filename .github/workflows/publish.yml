@@ -68,7 +68,7 @@ jobs:
         name: python-package-distributions
         path: dist/
     - name: Sign the dists with Sigstore
-      uses: sigstore/gh-action-sigstore-python@v3.0.0
+      uses: sigstore/gh-action-sigstore-python@v3.5.0
       with:
         inputs: >-
           ./dist/*-1.*.tar.gz
@@ -76,8 +76,11 @@ jobs:
     - name: Create GitHub Release
       env:
         GITHUB_TOKEN: ${{ github.token }}
+      # Skip creation if the release already exists so a failed run of this
+      # job can simply be re-run after the release was created by hand.
       run: >-
-        gh release create
+        gh release view '${{ github.ref_name }}' --repo '${{ github.repository }}' >/dev/null 2>&1
+        || gh release create
         '${{ github.ref_name }}'
         --repo '${{ github.repository }}'
         --notes ""
